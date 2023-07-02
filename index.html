@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Cropping Demo</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.css">
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    #preview {
+      max-width: 100%;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Cropping Demo</h1>
+    <input type="file" id="imageInput">
+    <div>
+      <button id="cropButton">Crop</button>
+      <button id="resetButton">Reset</button>
+      <button id="downloadButton" disabled>Download</button> <!-- Added download button -->
+    </div>
+    <div>
+      <h2>Preview:</h2>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.12/dist/cropper.js"></script>
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      var image = document.getElementById('imageInput');
+      var preview = document.getElementById('preview');
+      var cropper;
+      var croppedImageDataURL; // Store the cropped image data URL
+
+      image.addEventListener('change', function (e) {
+        var files = e.target.files;
+        var reader;
+        
+        if (files && files.length > 0) {
+          reader = new FileReader();
+          reader.onload = function () {
+            var imageDataURL = reader.result;
+            preview.innerHTML = '<img src="' + imageDataURL + '" alt="Preview Image">';
+            cropper = new Cropper(preview.firstChild, {
+              aspectRatio: 1, // Set the aspect ratio as needed
+              viewMode: 1, // Enable cropping within the container
+              movable: false,
+              scalable: false,
+              zoomable: false,
+              rotatable: false,
+            });
+            document.getElementById('downloadButton').disabled = true; // Disable download button after image change
+          };
+          reader.readAsDataURL(files[0]);
+        }
+      });
+
+      document.getElementById('cropButton').addEventListener('click', function () {
+        var croppedCanvas = cropper.getCroppedCanvas();
+        if (croppedCanvas) {
+          croppedImageDataURL = croppedCanvas.toDataURL();
+          console.log('Cropped Image Data URL:', croppedImageDataURL);
+          document.getElementById('downloadButton').disabled = false; // Enable download button after cropping
+        }
+      });
+
+      document.getElementById('resetButton').addEventListener('click', function () {
+        cropper.reset();
+        document.getElementById('downloadButton').disabled = true; // Disable download button after reset
+      });
+
+      document.getElementById('downloadButton').addEventListener('click', function () {
+        if (croppedImageDataURL) {
+          var a = document.createElement('a');
+          a.href = croppedImageDataURL;
+          a.download = 'cropped_image.png';
+          a.dispatchEvent(new MouseEvent('click'));
+        }
+      });
+    });
+  </script>
+</body>
+</html>
